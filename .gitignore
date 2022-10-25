@@ -1,0 +1,5 @@
+.idea
+__pypackages__/
+.env
+.ash_history
+.pytest_cache

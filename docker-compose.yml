@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    entrypoint: /entrypoint.sh
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - docker/.env
+    volumes:
+      - ./app:/usr/src/app/
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5431:5432"
+    env_file:
+      - docker/.env
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+
+volumes:
+  postgres_data:

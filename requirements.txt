@@ -1,0 +1,45 @@
+# client
+aiohttp==3.8.1
+
+aiohttp-session==2.9.0
+
+# rabbit
+aio-pika==8.2.0
+
+# tests
+pytest==7.1.2
+pytest-aiohttp==1.0.4
+pytest-asyncio==0.19.0
+pytest-cov==3.0.0
+pytest-mock==3.8.2
+aioresponses==0.7.3
+
+# server
+gunicorn==20.1.0
+
+# loop
+uvloop==0.16.0
+
+# swagger
+aiohttp-apispec==2.2.3
+
+# code style
+flake8==5.0.4
+pylint==2.15.2
+
+# migrations
+alembic==1.8.1
+
+# postgres driver
+asyncpg==0.26.0
+
+# sqlalchemy
+SQLAlchemy==1.4.40
+
+# validation
+marshmallow==3.17.0
+marshmallow-enum==1.5.1
+marshmallow-dataclass==8.5.9
+
+# Url converter
+yarl==1.8.1

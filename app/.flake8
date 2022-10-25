@@ -1,0 +1,4 @@
+[flake8]
+
+exclude = .ash_history, .cache, venv, .mypy_cache, .idea, alembic
+max-line-length = 100
