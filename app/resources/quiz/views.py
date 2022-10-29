@@ -1,3 +1,5 @@
+from json import dumps
+
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPNotFound
 from aiohttp_apispec import (
     request_schema,
@@ -7,9 +9,8 @@ from aiohttp_apispec import (
     match_info_schema
 )
 
-from utils.custom_response import json_response
 from utils.schemas_converting import schema_converter
-from web.app import View
+from resources.base_view import View
 from resources.quiz import schemas
 
 
@@ -26,7 +27,8 @@ class ProgrammingLanguageView(View):
             .create_programming_language(title)
         ):
             return result, 201
-        raise HTTPBadRequest(text="Such a programming language already exists")
+
+        raise HTTPBadRequest(text=dumps({"detail": "Such a programming language already exists"}))
 
     @docs(tags=["Programming Language"], summary="Get all programming languages")
     @response_schema(schemas.ProgrammingLanguageListResponseSchema.Schema(), code=200)
@@ -65,19 +67,27 @@ class ProgrammingLanguageDetailView(View):
                 .update_programming_language(self.request["match_info"].id, title)
         ):
             return result
-        raise HTTPNotFound(text="Not found")
+        raise HTTPNotFound(text=dumps({"detail": "Not found"}))
 
 
-class QuestionView(View):
+class QuizView(View):
 
-    # @docs(tags=["Question"], summary="Get questions")
-    # async def get(self):
-    #     pass
+    @docs(tags=["Quiz"], summary="List quizzes")
+    @response_schema(schemas.QuizListResponseSchema.Schema())
+    @querystring_schema(schemas.PageSchema)
+    @schema_converter.convert_to_schema(schemas.QuizListSchema)
+    async def get(self):
+        return await self.store.quiz.get_quizzes(**self.request["querystring"])
 
-    @docs(tags=["Question"], summary="Create a question")
-    @request_schema(schemas.QuestionCreateSchema.Schema())
-    @response_schema(schemas.QuestionDetailResponseSchema.Schema())
-    # @schema_converter.convert_to_schema(schemas.QuestionCreateSchema)
+    @docs(tags=["Quiz"], summary="Create a question")
+    @request_schema(schemas.QuizCreateSchema.Schema())
+    @response_schema(schemas.QuizDetailResponseSchema.Schema())
+    @schema_converter.convert_to_schema(schemas.QuizCreateSchema)
     async def post(self):
-        self.store.quiz.create_quiz()
-        return json_response(data={"detail": True})
+        language_exists = await (
+            self.store.quiz.programming_language_service
+            .is_programming_language_exists(language_id=self.data.language_id)
+        )
+        if language_exists:
+            return await self.store.quiz.create_quiz(self.data), 201
+        raise HTTPBadRequest(text=dumps({"detail": "There is no such programming language."}))

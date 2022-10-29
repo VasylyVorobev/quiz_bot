@@ -2,7 +2,7 @@ from aiohttp_apispec import docs, response_schema
 
 from resources.ping.schemas import PingSchema
 from utils.custom_response import json_response
-from web.app import View
+from resources.base_view import View
 
 
 class PingView(View):

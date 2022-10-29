@@ -61,7 +61,7 @@ async def error_handling_middleware(request: "Request", handler: Callable) -> Re
         )
     except HTTPException as e:
         return error_json_response(
-            http_status=400, status=HTTP_ERROR_CODES[400], message=str(e), data={"detail": e.text}
+            http_status=400, status=HTTP_ERROR_CODES[400], message=str(e), data=json.loads(e.text)
         )
     except HTTPUnprocessableEntity as e:
         return error_json_response(
@@ -70,10 +70,6 @@ async def error_handling_middleware(request: "Request", handler: Callable) -> Re
             message=e.reason,
             data=json.loads(e.text),
         )
-    # except (Exception,) as e:
-    #     return error_json_response(
-    #         http_status=500, status=HTTP_ERROR_CODES[500], message=str(e)
-    #     )
 
 
 def setup_middlewares(app: "Application"):

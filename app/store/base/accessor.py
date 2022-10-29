@@ -12,7 +12,7 @@ class BaseAccessor(AbstractAccessor):
         self.app = app
         self.logger = getLogger("accessor")
         app.on_startup.append(self.connect)
-        app.on_shutdown.append(self.connect)
+        app.on_shutdown.append(self.disconnect)
 
     async def connect(self, app: "Application"):
         return

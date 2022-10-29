@@ -1,4 +1,5 @@
 import typing
+from json import dumps
 
 from aiohttp.web_exceptions import HTTPBadRequest
 from sqlalchemy import select, exists, func, update, and_, insert
@@ -27,8 +28,24 @@ class ProgrammingLanguageService:
             await conn.commit()
             return res
 
-    async def is_programming_language_exists(self, title: str) -> bool:
-        query = select([exists().where(programming_languages.c.title == title)])
+    async def is_programming_language_exists(
+            self,
+            title: None | str = None,
+            language_id: None | int = None
+    ) -> bool:
+        assert title or language_id
+
+        if title and language_id:
+            where_ = and_(
+                programming_languages.c.title == title,
+                programming_languages.c.id == language_id
+            )
+        elif title:
+            where_ = programming_languages.c.title == title
+        else:  # language_id
+            where_ = programming_languages.c.id == language_id
+
+        query = select([exists().where(where_)])
         async with self.app.database.engine.connect() as conn:
             res = await conn.execute(query)
             return res.scalar()
@@ -58,10 +75,10 @@ class ProgrammingLanguageService:
         query = select(programming_languages).limit(limit).offset(offset)
         async with self.app.database.engine.connect() as conn:
             res = await conn.execute(query)
-            return {
-                "count": await self.get_programming_languages_count(),
-                "result": res.fetchall()
-            }
+            return GetProgrammingLanguages(
+                count=await self.get_programming_languages_count(),
+                result=res.fetchall()
+            )
 
     async def get_programming_languages_count(self) -> int:
         query = select(func.count()).select_from(programming_languages)
@@ -81,7 +98,9 @@ class ProgrammingLanguageService:
             title: str
     ) -> None | tuple[int, str]:
         if await self.is_programming_language_exists_for_update(language_id, title):
-            raise HTTPBadRequest(text="Such a programming language already exists")
+            raise HTTPBadRequest(
+                text=dumps({"detail": "Such a programming language already exists"})
+            )
         query = (
             update(programming_languages)
             .where(programming_languages.c.id == language_id)

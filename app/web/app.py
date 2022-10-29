@@ -3,7 +3,6 @@ from typing import Optional
 from aiohttp.web import (
     Application as AiohttpApplication,
     Request as AiohttpRequest,
-    View as AiohttpView,
 )
 from aiohttp_apispec import setup_aiohttp_apispec
 
@@ -25,20 +24,6 @@ class Request(AiohttpRequest):
     @property
     def app(self) -> Application:
         return super().app()
-
-
-class View(AiohttpView):
-    @property
-    def request(self) -> Request:
-        return super().request
-
-    @property
-    def store(self) -> Store:
-        return self.request.app.store
-
-    @property
-    def data(self):
-        return self.request.get("data", {})
 
 
 app = Application()

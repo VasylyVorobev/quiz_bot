@@ -31,3 +31,28 @@ async def get_programming_language(db_session):
         data = res.fetchone()
         await conn.commit()
         return data
+
+
+@pytest.fixture
+async def create_quizzes(cli, db_session, get_programming_language):
+    language_id, _ = get_programming_language
+    res = []
+    for i in range(3):
+        data = {
+            "language_id": language_id,
+            "title": f"Question {i} ?",
+            "answers": [
+                {
+                    "title": "Answer 1",
+                    "is_correct": True
+                },
+                {
+                    "title": "Answer 2",
+                    "is_correct": False
+                }
+            ]
+        }
+        resp = await cli.post("/api/v1/quiz/", json=data)
+        res.append(await resp.json())
+
+    return res
