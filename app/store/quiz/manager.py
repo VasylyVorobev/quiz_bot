@@ -37,8 +37,7 @@ class QuizManager(BaseAccessor):
             raise HTTPBadRequest(
                 text=dumps({"detail": "Such a programming language already exists"})
             )
-
-        questions_id = list(zip(*questions.result))[0]
+        questions_id = list(zip(*questions.result))[0] if questions.result else ()
         answers = (await self.answer.get_answers(questions_id=questions_id)).result
         return QuizListResponse(
             questions=questions,
