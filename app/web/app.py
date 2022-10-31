@@ -7,7 +7,6 @@ from aiohttp.web import (
 from aiohttp_apispec import setup_aiohttp_apispec
 
 from store import Store, setup_store
-from store.database.database import Database
 from web.config import Config, setup_config
 from web.logger import setup_logging
 from web.middlewares import setup_middlewares
@@ -17,7 +16,6 @@ from web.routes import setup_routes
 class Application(AiohttpApplication):
     config: Optional[Config] = None
     store: Optional[Store] = None
-    database: Optional[Database] = None
 
 
 class Request(AiohttpRequest):

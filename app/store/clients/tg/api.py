@@ -36,11 +36,18 @@ class TgClient:
         updates = cast(dict, self.get_updates(offset, timeout))
         return GetUpdatesResponse.Schema().load(updates)
 
-    async def send_message(self, chat_id: int, text: str) -> dict:
+    async def send_message(
+            self,
+            chat_id: int,
+            text: str,
+            reply_markup: None | dict = None
+    ) -> dict:
         payload = {
             "chat_id": chat_id,
             "text": text
         }
+        if reply_markup:
+            payload.update(reply_markup=reply_markup)
         async with self.session.get(self.get_url("sendMessage"), json=payload) as resp:
             return await resp.json()
 

@@ -10,23 +10,17 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from alembic import context
 
 from store.database import metadata
+from web.config import get_config
 
+app_config = get_config()
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
+config.set_main_option("sqlalchemy.url", app_config.db.db_url)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-
-def set_sqlalchemy_url():
-    db_url = (
-        f"postgresql+asyncpg://{environ['POSTGRES_USER']}:{environ['POSTGRES_PASSWORD']}@"
-        f"{environ['POSTGRES_HOST']}:{environ['POSTGRES_PORT']}/{environ['POSTGRES_DB']}"
-    )
-    config.set_main_option("sqlalchemy.url", db_url)
 
 
 # add your model's MetaData object here
@@ -53,7 +47,6 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    set_sqlalchemy_url()
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -80,7 +73,6 @@ async def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    set_sqlalchemy_url()
     connectable = AsyncEngine(
         engine_from_config(
             config.get_section(config.config_ini_section),

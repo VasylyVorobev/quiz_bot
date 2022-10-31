@@ -23,7 +23,7 @@ class ProgrammingLanguageService:
             .values(title=title)
             .returning(*programming_languages.columns)
         )
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = (await conn.execute(query)).fetchone()
             await conn.commit()
             return res
@@ -46,7 +46,7 @@ class ProgrammingLanguageService:
             where_ = programming_languages.c.id == language_id
 
         query = select([exists().where(where_)])
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return res.scalar()
 
@@ -63,7 +63,7 @@ class ProgrammingLanguageService:
         query = (
             select([exists_query])
         )
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return res.scalar()
 
@@ -73,7 +73,7 @@ class ProgrammingLanguageService:
             offset: int
     ) -> GetProgrammingLanguages:
         query = select(programming_languages).limit(limit).offset(offset)
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return GetProgrammingLanguages(
                 count=await self.get_programming_languages_count(),
@@ -82,13 +82,13 @@ class ProgrammingLanguageService:
 
     async def get_programming_languages_count(self) -> int:
         query = select(func.count()).select_from(programming_languages)
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return res.scalar()
 
     async def get_programming_language(self, language_id: int) -> None | tuple[int, str]:
         query = select(programming_languages).where(programming_languages.c.id == language_id)
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return res.one_or_none()
 
@@ -107,7 +107,7 @@ class ProgrammingLanguageService:
             .values(title=title)
             .returning(*programming_languages.columns)
         )
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = (await conn.execute(query)).fetchone()
             await conn.commit()
             return res

@@ -40,14 +40,14 @@ class AnswerService:
         )
         if conn:
             return (await conn.execute(query)).fetchall()
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = (await conn.execute(query)).fetchall()
             await conn.commit()
             return res
 
     async def get_answers(self, questions_id: typing.Iterable[int]) -> AnswersList:
         query = select(answers).where(answers.c.question.in_(questions_id))
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return AnswersList(**{
                 "count": await self.get_answers_count(),
@@ -56,5 +56,5 @@ class AnswerService:
 
     async def get_answers_count(self) -> int:
         query = select(func.count()).select_from(answers)
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             return (await conn.execute(query)).scalar()

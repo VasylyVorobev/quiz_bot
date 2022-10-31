@@ -74,3 +74,13 @@ class SendMessageResponse:
 
     class Meta:
         unknown = EXCLUDE
+
+
+@dataclass
+class KeyBoardButton:
+    text: str
+
+
+@dataclass
+class ReplyKeyboardMarkup:
+    keyboard: list[KeyBoardButton]

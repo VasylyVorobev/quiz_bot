@@ -1,13 +1,15 @@
 import asyncio
 import typing
+from dataclasses import asdict
 from json import dumps
 from logging import getLogger
+from uuid import uuid4
 
 from aiohttp import ClientSession
 
 from store.base.accessor import BaseAccessor
 from store.clients.tg.api import TgClient
-from store.tg.dcs import UpdateObj
+from store.tg.dcs import UpdateObj, ReplyKeyboardMarkup, KeyBoardButton
 
 if typing.TYPE_CHECKING:
     from web.app import Application
@@ -30,7 +32,6 @@ class TgAccessor(BaseAccessor):
     async def disconnect(self, app: "Application"):
 
         if self.task:
-            await self.task
             try:
                 self.task.cancel()
             except asyncio.CancelledError:
@@ -48,5 +49,18 @@ class TgAccessor(BaseAccessor):
                 await self.app.store.queue.sender.send_message(dumps(update))
 
     async def handle_update(self, update: UpdateObj):
-        data = await self.tg_client.send_message(update.message.chat.id, update.message.text)
+        if update.message.text.startswith("/start"):
+            created, user = await self.app.store.user.get_or_create_user(
+                tg_id=update.message.from_.id,
+                username=update.message.from_.username
+            )
+            buttons = [[KeyBoardButton(text=str(uuid4())) for i in range(2)] for i in range(3)]
+            keyboard = asdict(ReplyKeyboardMarkup(keyboard=buttons))
+            data = await self.tg_client.send_message(
+                update.message.chat.id,
+                update.message.text,
+                reply_markup=keyboard
+            )
+        else:
+            data = await self.tg_client.send_message(update.message.chat.id, update.message.text)
         self.logger.info("send message %s", data)

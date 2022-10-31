@@ -18,7 +18,7 @@ class QuizManager(BaseAccessor):
         self.answer = AnswerService(self.app)
 
     async def create_quiz(self, quiz_data: QuizCreateSchema) -> QuizCreateResponse:
-        async with self.app.database.engine.begin() as conn:
+        async with self.app.store.db.engine.begin() as conn:
             question = await self.question.create_question(
                 quiz_data.language_id,
                 quiz_data.title,

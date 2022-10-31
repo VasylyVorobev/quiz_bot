@@ -34,7 +34,7 @@ class QuestionService:
         )
         if conn:
             return (await conn.execute(query)).fetchone()
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             data = res.fetchone()
             await conn.commit()
@@ -42,7 +42,7 @@ class QuestionService:
 
     async def get_questions(self, limit: int, offset: int) -> QuestionsList:
         query = select(questions).limit(limit).offset(offset)
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return QuestionsList(**{
                 "count": await self.get_questions_count(),
@@ -51,5 +51,5 @@ class QuestionService:
 
     async def get_questions_count(self) -> int:
         query = select(func.count()).select_from(questions)
-        async with self.app.database.engine.connect() as conn:
+        async with self.app.store.db.engine.connect() as conn:
             return (await conn.execute(query)).scalar()

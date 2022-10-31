@@ -43,3 +43,9 @@ marshmallow-dataclass==8.5.9
 
 # Url converter
 yarl==1.8.1
+
+# sqlalchemy-utils
+SQLAlchemy-Utils==0.38.3
+
+# postgres driver for test
+psycopg2-binary==2.9.5

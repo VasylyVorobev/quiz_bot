@@ -8,19 +8,20 @@ if typing.TYPE_CHECKING:
     from web.app import Application
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class DbConfig:
     POSTGRES_USER: str
     POSTGRES_HOST: str
     POSTGRES_PASSWORD: str
     POSTGRES_PORT: str
     POSTGRES_DB: str
+    POSTGRES_SCHEMA: str = "postgresql+asyncpg"
 
     @property
     def db_url(self) -> str:
         return str(
             URL.build(
-                scheme="postgresql+asyncpg",
+                scheme=self.POSTGRES_SCHEMA,
                 user=self.POSTGRES_USER,
                 password=self.POSTGRES_PASSWORD,
                 host=self.POSTGRES_HOST,
@@ -29,7 +30,7 @@ class DbConfig:
         )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class RabbitConfig:
     RABBITMQ_HOST: str
     RABBITMQ_PORT: str
@@ -47,19 +48,19 @@ class RabbitConfig:
         ))
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class TgConfig:
     BOT_TOKEN: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class AdminConfig:
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
     SESSION_KEY: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class Config:
     db: DbConfig
     rabbit: RabbitConfig
@@ -67,8 +68,8 @@ class Config:
     tg: TgConfig
 
 
-def setup_config(app: "Application") -> None:
-    app.config = Config(
+def get_config() -> Config:
+    return Config(
         db=DbConfig(
             POSTGRES_USER=environ.get("POSTGRES_USER"),
             POSTGRES_HOST=environ.get("POSTGRES_HOST"),
@@ -91,3 +92,7 @@ def setup_config(app: "Application") -> None:
             BOT_TOKEN=environ.get("BOT_TOKEN")
         )
     )
+
+
+def setup_config(app: "Application") -> None:
+    app.config = get_config()
