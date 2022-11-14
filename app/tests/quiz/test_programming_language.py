@@ -17,7 +17,7 @@ class TestCreateProgrammingLanguage:
     async def test_invalid(self, cli):
         data = {"invalid": "python"}
         resp = await cli.post("/api/v1/programming_language/", json=data)
-        assert resp.status == 400
+        assert resp.status == 422
 
 
 class TestListProgrammingLanguage:
@@ -51,7 +51,7 @@ class TestGetProgrammingLanguage:
         assert resp.status == 404
 
         resp = await cli.get("/api/v1/programming_language/invalid_number/")
-        assert resp.status == 400
+        assert resp.status == 422
 
 
 class TestUpdateProgrammingLanguage:

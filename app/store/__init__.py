@@ -4,6 +4,7 @@ from store.database.database import Database
 from store.queue.accessor import BaseQueue
 from store.quiz.manager import QuizManager
 from store.tg.accessor import TgAccessor
+from store.tg.quiz_game import QuizGame
 from store.user.accessor import UserAccessor
 
 if typing.TYPE_CHECKING:
@@ -19,6 +20,7 @@ class Store:
 
         self.quiz = QuizManager(app)
         self.tg = TgAccessor(app)
+        _ = QuizGame(app, self.tg)
         self.queue = BaseQueue(app)
         self.user = UserAccessor(app)
 

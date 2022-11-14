@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, VARCHAR, ForeignKey, Boolean, false
+from sqlalchemy import Table, Column, Integer, VARCHAR, ForeignKey, Boolean, false, TIMESTAMP, func
 
 from store.database.metadata import metadata
 
@@ -37,6 +37,14 @@ questions_users = Table(
     metadata,
     Column("id", Integer, primary_key=True),
 
+    Column("is_correct", Boolean, server_default=false(), default=False, nullable=False),
     Column("user", Integer, ForeignKey("users.id"), nullable=False),
     Column("question", Integer, ForeignKey("questions.id"), nullable=False),
+    Column(
+        "answer_timestamp",
+        TIMESTAMP(timezone=True),
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        nullable=False
+    )
 )

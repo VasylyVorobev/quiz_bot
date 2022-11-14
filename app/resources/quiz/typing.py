@@ -10,7 +10,7 @@ class GetProgrammingLanguages:
 @dataclass
 class QuizCreateResponse:
     question: tuple[int, str, int]
-    answers: tuple[int, str, bool, int]
+    answers: list[tuple[int, str, bool, int]]
 
 
 @dataclass

@@ -61,11 +61,17 @@ class AdminConfig:
 
 
 @dataclass(slots=True)
+class QuizConfig:
+    TIME_BETWEEN_ANSWERS: int  # in sec
+
+
+@dataclass(slots=True)
 class Config:
     db: DbConfig
     rabbit: RabbitConfig
     admin_info: AdminConfig
     tg: TgConfig
+    quiz_conf: QuizConfig
 
 
 def get_config() -> Config:
@@ -90,6 +96,9 @@ def get_config() -> Config:
         ),
         tg=TgConfig(
             BOT_TOKEN=environ.get("BOT_TOKEN")
+        ),
+        quiz_conf=QuizConfig(
+            TIME_BETWEEN_ANSWERS=environ.get("TIME_BETWEEN_ANSWERS", 10)
         )
     )
 

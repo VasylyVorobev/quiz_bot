@@ -14,8 +14,8 @@ class ConvertToSchema:
         self.converters: dict[Type[Schema], RawSqlConverterFunction] = {}
 
     @staticmethod
-    def _is_schemed_dataclass(cls) -> bool:
-        return is_dataclass(cls) and hasattr(cls, "Schema")
+    def _is_schemed_dataclass(clazz) -> bool:
+        return is_dataclass(clazz) and hasattr(clazz, "Schema")
 
     def register(self, wrapped: RawSqlConverterFunction) -> RawSqlConverterFunction:
         type_hints = get_type_hints(wrapped)

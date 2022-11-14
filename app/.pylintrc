@@ -2,4 +2,6 @@
 disable=
     C0114, # missing-module-docstring
     C0115,
-    C0116
+    C0116,
+    C0103, # class constant name doesn't conform to UPPER_CASE
+    R0903, # too-few-public-methods

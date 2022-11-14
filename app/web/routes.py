@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
 from resources.ping.routes import setup_routes as ping_routes
-from utils.url_paths import get_base_api_path
 from resources.quiz.routes import setup_routes as quiz_routes
+from utils.url_paths import get_base_api_path
+
 
 if TYPE_CHECKING:
     from web.app import Application

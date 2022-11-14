@@ -1,19 +1,10 @@
 import json
 from typing import TYPE_CHECKING, Callable
 
-from aiohttp.web_exceptions import (
-    HTTPUnauthorized,
-    HTTPForbidden,
-    HTTPNotFound,
-    HTTPNotImplemented,
-    HTTPMethodNotAllowed,
-    HTTPConflict,
-    HTTPException,
-    HTTPUnprocessableEntity
-)
+from aiohttp.web_exceptions import HTTPException
 from aiohttp.web_response import Response
-from aiohttp_apispec import validation_middleware
 from aiohttp.web_middlewares import middleware
+from aiohttp_apispec import validation_middleware
 
 from utils.custom_response import error_json_response
 
@@ -27,6 +18,7 @@ HTTP_ERROR_CODES = {
     404: "not_found",
     405: "not_implemented",
     409: "conflict",
+    422: "unprocessable_entity",
     500: "internal_server_error",
 }
 
@@ -35,40 +27,16 @@ HTTP_ERROR_CODES = {
 async def error_handling_middleware(request: "Request", handler: Callable) -> Response:
     try:
         return await handler(request)
-    except HTTPUnauthorized as e:
+    except HTTPException as exc:
+        try:
+            reason = json.loads(exc.text)
+        except json.JSONDecodeError:
+            reason = exc.text
         return error_json_response(
-            http_status=401, status=HTTP_ERROR_CODES[401], message=str(e)
-        )
-    except HTTPForbidden as e:
-        return error_json_response(
-            http_status=403, status=HTTP_ERROR_CODES[403], message=str(e)
-        )
-    except HTTPNotFound as e:
-        return error_json_response(
-            http_status=404, status=HTTP_ERROR_CODES[404], message=str(e)
-        )
-    except HTTPNotImplemented as e:
-        return error_json_response(
-            http_status=405, status=HTTP_ERROR_CODES[405], message=str(e)
-        )
-    except HTTPMethodNotAllowed as e:
-        return error_json_response(
-            http_status=405, status=HTTP_ERROR_CODES[405], message=str(e)
-        )
-    except HTTPConflict as e:
-        return error_json_response(
-            http_status=409, status=HTTP_ERROR_CODES[409], message=e.text
-        )
-    except HTTPException as e:
-        return error_json_response(
-            http_status=400, status=HTTP_ERROR_CODES[400], message=str(e), data=json.loads(e.text)
-        )
-    except HTTPUnprocessableEntity as e:
-        return error_json_response(
-            http_status=400,
-            status=HTTP_ERROR_CODES[400],
-            message=e.reason,
-            data=json.loads(e.text),
+            http_status=exc.status,
+            message=exc.reason,
+            status=HTTP_ERROR_CODES[exc.status],
+            data=reason if isinstance(reason, dict) else {"reason": reason}
         )
 
 

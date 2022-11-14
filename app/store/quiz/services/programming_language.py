@@ -69,10 +69,14 @@ class ProgrammingLanguageService:
 
     async def get_programming_languages(
             self,
-            limit: int,
-            offset: int
+            limit: None | int = None,
+            offset: None | int = None
     ) -> GetProgrammingLanguages:
-        query = select(programming_languages).limit(limit).offset(offset)
+        query = select(programming_languages)
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
         async with self.app.store.db.engine.connect() as conn:
             res = await conn.execute(query)
             return GetProgrammingLanguages(

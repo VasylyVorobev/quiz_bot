@@ -170,7 +170,7 @@ def convert_quizzes_to_schema(data: QuizListResponse) -> QuizListSchema:
                 answers=[
                     AnswerCreateSchema(
                         id=answer_id,
-                        title=title,
+                        title=an_title,
                         is_correct=is_correct,
                         question=question
                     ) for answer_id, an_title, is_correct, question in value

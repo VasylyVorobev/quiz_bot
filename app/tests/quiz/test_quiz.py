@@ -48,7 +48,7 @@ class TestCreateQuiz:
             ]
         }
         resp = await cli.post("/api/v1/quiz/", json=data)
-        assert resp.status == 400
+        assert resp.status == 422
 
     async def test_create_quiz_invalid_language(self, cli):
         data = {
@@ -70,7 +70,7 @@ class TestCreateQuiz:
 
         data["answers"][0]["is_correct"] = False
         resp = await cli.post("/api/v1/quiz/", json=data)
-        assert resp.status == 400
+        assert resp.status == 422
 
     async def test_create_quiz_few_answers(self, cli, get_programming_language):
         language_id, _ = get_programming_language
@@ -86,7 +86,7 @@ class TestCreateQuiz:
             ]
         }
         resp = await cli.post("/api/v1/quiz/", json=data)
-        assert resp.status == 400
+        assert resp.status == 422
 
 
 class TestListQuiz:
