@@ -15,7 +15,7 @@ class Database:
     async def connect(self, *_, **__) -> None:
         self.engine: AsyncEngine = create_async_engine(
             self.app.config.db.db_url,
-            echo=True,
+            # echo=True,
             future=True
         )
 

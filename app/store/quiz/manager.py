@@ -64,26 +64,21 @@ class QuizManager(BaseAccessor):
                 (questions_users.c.is_correct.is_(True)) &
                 (questions.c.language == language_id)
             )
-        ).alias("f1")
+        )
 
         query = (
             select([questions.c.id, questions.c.title, questions.c.language])
-            .select_from(
-                questions
-                .join(
-                    answered_questions_query,
-                    questions.c.id != answered_questions_query.c.question,
-                    isouter=True
-                )
+            .where(
+                (questions.c.language == language_id) &
+                (questions.c.id.not_in(answered_questions_query))
             )
-            .where(questions.c.language == language_id)
             .limit(1)
         )
 
         async with self.app.store.db.engine.begin() as conn:
             question = (await conn.execute(query)).fetchone()
             if not question:
-                """All {language_id} questions answered"""
+                # All {language_id} questions answered
                 return
 
             question_answers = (

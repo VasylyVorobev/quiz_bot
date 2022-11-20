@@ -1,5 +1,3 @@
-from datetime import timedelta, datetime
-
 from sqlalchemy import select, exists, or_, insert, update, and_
 
 from store.base.accessor import BaseAccessor
@@ -109,25 +107,3 @@ class UserAccessor(BaseAccessor):
         async with self.app.store.db.engine.connect() as conn:
             await conn.execute(query)
             await conn.commit()
-
-    async def check_question_timestamp(self, user_id: int, question_id: int) -> tuple[bool, int]:
-        query = (
-            select(questions_users)
-            .where(
-                and_(
-                    questions_users.c.question == question_id,
-                    questions_users.c.user == user_id
-                )
-            )
-        )
-        async with self.app.store.db.engine.connect() as conn:
-            res = await conn.execute(query)
-            if data := res.fetchone():
-                *_, timestamp = data
-                t = timestamp.replace(tzinfo=None) + \
-                    timedelta(seconds=self.app.config.quiz_conf.TIME_BETWEEN_ANSWERS)
-                now = datetime.now()
-                if t > now:
-                    difference = t - now
-                    return False, difference.seconds
-            return True, 0

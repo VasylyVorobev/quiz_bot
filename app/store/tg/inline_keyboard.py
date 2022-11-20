@@ -18,7 +18,7 @@ class InlineKeyboard:
     # noinspection PyArgumentList
     def to_reply_markup(self) -> InlineKeyboardMarkup:
         tg_buttons_list: DefaultDict[int, list[InlineKeyboardButton]] = defaultdict(list)
-        for row in range(len(self._buttons)):
+        for row, _ in enumerate(self._buttons):
             row_dict = self._buttons[row]
             for column in row_dict:
                 button = row_dict[column]

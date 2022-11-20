@@ -1,8 +1,26 @@
-from typing import cast
+from logging import getLogger
+from typing import cast, Callable, Any
+from functools import wraps
 
 from aiohttp import ClientSession
 
 from store.tg.dcs import GetUpdatesResponse, SendMessageResponse
+
+
+logger = getLogger(__name__)
+
+
+def _check_client_session(func: Callable[[str, str, None | dict], Any]):
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        tg_client, *_ = args
+        session = cast(ClientSession, tg_client.session)
+        if not session or session.closed:
+            logger.error("Session expired")
+            tg_client.session = ClientSession()
+        return func(*args, **kwargs)
+
+    return wrapped
 
 
 class TgClient:
@@ -16,8 +34,9 @@ class TgClient:
         return f"{self.BASE_URL}{self.token}/{method}"
 
     async def get_me(self) -> dict:
-        async with self.session.get(self.get_url("getMe")) as resp:
-            return await resp.json()
+        return await self.make_request(
+            http_method="get", method="getMe"
+        )
 
     async def get_updates(self, offset: None | int = None, timeout: int = 0) -> dict:
         params = {}
@@ -25,9 +44,22 @@ class TgClient:
             params["offset"] = offset
         if timeout:
             params["timeout"] = timeout
-        async with self.session.get(self.get_url("getUpdates"), params=params) as resp:
-            res = await resp.json()
-            return res
+        return await self.make_request(
+            http_method="get", method="getUpdates", params=params
+        )
+
+    @_check_client_session
+    async def make_request(
+            self, http_method: str, method: str, params: None | dict = None
+    ) -> dict:
+        if http_method == "get":
+            async with self.session.get(self.get_url(method), json=params or {}) as resp:
+                return await resp.json()
+        elif http_method == "post":
+            async with self.session.post(self.get_url(method), json=params) as resp:
+                return await resp.json()
+
+        raise NotImplementedError
 
     async def get_updates_in_objects(
             self,
@@ -48,8 +80,9 @@ class TgClient:
             "text": text,
             **kwargs
         }
-        async with self.session.get(self.get_url("sendMessage"), json=payload) as resp:
-            return await resp.json()
+        return await self.make_request(
+            http_method="get", method="sendMessage", params=payload
+        )
 
     async def send_message_obj(self, chat_id: int, text: str) -> SendMessageResponse:
         message = await self.send_message(chat_id, text)
@@ -68,5 +101,20 @@ class TgClient:
             "show_alert": show_alert,
             **kwargs
         }
-        async with self.session.get(self.get_url("answerCallbackQuery"), json=payload) as resp:
-            return await resp.json()
+        return await self.make_request(
+            http_method="get", method="answerCallbackQuery", params=payload
+        )
+
+    async def edit_message(
+            self, chat_id: int | str, message_id: int, text: str, reply_markup: dict, **kwargs
+    ) -> dict:
+        payload = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "text": text,
+            "reply_markup": reply_markup,
+            **kwargs
+        }
+        return await self.make_request(
+            http_method="get", method="editMessageText", params=payload
+        )

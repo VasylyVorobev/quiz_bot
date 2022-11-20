@@ -19,5 +19,6 @@ RUN pip install -r ./requirements.txt
 
 COPY ./app $APP_HOME
 COPY ./docker/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 RUN flake8 .
